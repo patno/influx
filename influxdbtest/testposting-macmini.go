@@ -11,11 +11,6 @@ import (
 	"github.com/influxdata/influxdb/client/v2"
 )
 
-const (
-	username = "admin"
-	password = "admin"
-)
-
 func main() {
 	now := time.Now()
 
