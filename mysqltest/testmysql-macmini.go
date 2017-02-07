@@ -8,11 +8,6 @@ import "time"
 import "github.com/pelletier/go-toml"
 import "os"
 
-const (
-	username = "admin"
-	password = "admin"
-)
-
 func main() {
 	//user:password@tcp(localhost:5555)/dbname?tls=skip-verify&autocommit=true
 
