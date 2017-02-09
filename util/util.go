@@ -1,6 +1,6 @@
-package util
+package influx
 
-import "github.com/influxdata/influxdb/client"
+import "github.com/influxdata/influxdb/client/v2"
 
 func QueryDB(clnt client.Client, cmd string, MyDB string) (res []client.Result, err error) {
 	q := client.Query{

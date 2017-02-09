@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/pelletier/go-toml"
-
 	"github.com/influxdata/influxdb/client/v2"
+	util "github.com/patno/influx/util"
+	"github.com/pelletier/go-toml"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 	c.Write(bp)
 
 	log.Println("Quering the Database")
-	res, err := queryDB(c, "SELECT * FROM cpu_usage GROUP BY * ORDER BY DESC LIMIT 1", "testdb")
+	res, err := util.QueryDB(c, "SELECT * FROM cpu_usage GROUP BY * ORDER BY DESC LIMIT 1", "testdb")
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -79,6 +79,7 @@ func main() {
 	fmt.Println("lastTime:" + lastTime)
 }
 
+/*
 func queryDB(clnt client.Client, cmd string, MyDB string) (res []client.Result, err error) {
 	q := client.Query{
 		Command:  cmd,
@@ -94,3 +95,4 @@ func queryDB(clnt client.Client, cmd string, MyDB string) (res []client.Result, 
 	}
 	return res, nil
 }
+*/
