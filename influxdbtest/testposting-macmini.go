@@ -13,12 +13,13 @@ import (
 
 func main() {
 	now := time.Now()
-
+	// load configuration
 	cfg, err := toml.LoadFile(os.Getenv("HOME") + "/config1wire.toml")
 	if err != nil {
 		log.Panic(err)
 	}
 
+	// preparing influx db
 	c, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr:     cfg.Get("influxdb.url").(string),
 		Username: cfg.Get("influxdb.user").(string),
@@ -38,6 +39,7 @@ func main() {
 		log.Fatal("Error:", err)
 	}
 
+	// creating influx db data
 	tags := map[string]string{"cpu:": "cpu-total"}
 
 	fields := map[string]interface{}{
@@ -52,9 +54,11 @@ func main() {
 	}
 	log.Println(pt)
 
+	// writing data to influx
 	bp.AddPoint(pt)
 	c.Write(bp)
 
+	// Query influx about latest data point
 	log.Println("Quering the Database")
 	res, err := util.QueryDB(c, "SELECT * FROM cpu_usage GROUP BY * ORDER BY DESC LIMIT 1", "testdb")
 
