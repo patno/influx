@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
-
 	"time"
 
 	client "github.com/influxdata/influxdb/client/v2"
 	"github.com/patno/influx/util"
 )
+
+const influxDatabase = "testdb"     // the database name
+const influxMeasurement = "network" // the influx measurement
 
 func main() {
 	log.Println("-------------------------------------------------------")
@@ -18,14 +20,22 @@ func main() {
 	defer db.Close()
 	log.Println("Connected to MySQl")
 
+	// Connect to InfluDB
+	influx := util.FactoryInfluxDB()
+
+	latestTimestamp := util.GetLatestTimestamp(influx, influxDatabase, influxMeasurement)
+	log.Printf("Latest Influx DB timestamp:%v\n", latestTimestamp)
+
 	// Read MySQL rows
-	rows, _, err := db.Query("select timestamp, latency, download, upload from 1wire.network order by timestamp")
+	//mysqlDbQuery := "select timestamp, latency, download, upload from 1wire.network order by timestamp"
+	mysqlDbQuery := fmt.Sprintf(
+		"select timestamp, latency, download, upload from 1wire.network where timestamp > '%v' order by timestamp", latestTimestamp)
+
+	log.Printf("MySQL Query:%v\n", mysqlDbQuery)
+	rows, _, err := db.Query(mysqlDbQuery)
 	util.CheckErr(err)
 	numberOfRows := len(rows)
 	log.Printf("Number of rows in MySQl:%v\n", numberOfRows)
-
-	// Connect to InfluDB
-	influx := util.FactoryInfluxDB()
 
 	for _, row := range rows {
 		timestampStr := row.Str(0)
@@ -33,12 +43,12 @@ func main() {
 		download := row.Float(2)
 		upload := row.Float(3)
 		timestamp := util.GetTimeFromString(timestampStr)
-		fmt.Printf("%v %v %v %v %v\n", timestampStr, latency, download, upload, timestamp)
-		time.Sleep(2000 * time.Millisecond)
+		log.Printf("ts=%v l=%v d=%v u=%v nts=%v\n", timestampStr, latency, download, upload, timestamp)
+		time.Sleep(10000 * time.Millisecond)
 
 		// creating influx db data
 		bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-			Database:  "testdb",
+			Database:  influxDatabase,
 			Precision: "s",
 		})
 		util.CheckErr(err)
@@ -50,7 +60,7 @@ func main() {
 			"download": download,
 			"upload":   upload,
 		}
-		pt, err := client.NewPoint("network", tags, fields, timestamp)
+		pt, err := client.NewPoint(influxMeasurement, tags, fields, timestamp)
 		util.CheckErr(err)
 		log.Println(pt)
 

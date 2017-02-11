@@ -1,13 +1,14 @@
 package util
 
 import (
-	"log"
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
 	"github.com/ziutek/mymysql/mysql"
 
 	"os"
+
+	"fmt"
 
 	"github.com/pelletier/go-toml"
 	_ "github.com/ziutek/mymysql/native" // will not work otherwise
@@ -23,6 +24,20 @@ func GetTimeFromString(timestampStr string) time.Time {
 	t, err := time.Parse(LayoutMYSQLDate, timestampStr)
 	CheckErr(err)
 	return t
+}
+
+// GetLatestTimestamp reads out the timestamp for the last row. Panics if fails.
+func GetLatestTimestamp(c client.Client, db string, measurement string) string {
+	query := fmt.Sprintf("SELECT * FROM %v GROUP BY * ORDER BY DESC LIMIT 1", measurement)
+	res, err := QueryDB(c, query, db)
+	CheckErr(err)
+	var myData [][]interface{} = make([][]interface{}, len(res[0].Series[0].Values))
+	for i, d := range res[0].Series[0].Values {
+		myData[i] = d
+	}
+
+	lastTime := myData[0][0].(string)
+	return lastTime
 }
 
 // QueryDB do a generic query towards influxdb
@@ -48,7 +63,7 @@ func FactoryMySQL() mysql.Conn {
 	cfg, err := toml.LoadFile(os.Getenv("HOME") + "/config1wire.toml")
 	CheckErr(err)
 
-	log.Println(cfg)
+	//log.Println(cfg)
 
 	db := mysql.New("tcp", "",
 		cfg.Get("mysql.host").(string),
