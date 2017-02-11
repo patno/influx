@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
 	client "github.com/influxdata/influxdb/client/v2"
 	"github.com/patno/influx/util"
 )
 
-const influxDatabase = "testdb"     // the database name
+const influxDatabase = "network"    // the database name
 const influxMeasurement = "network" // the influx measurement
 
 func main() {
@@ -27,7 +26,8 @@ func main() {
 	log.Printf("Latest Influx DB timestamp:%v\n", latestTimestamp)
 
 	// Read MySQL rows
-	//mysqlDbQuery := "select timestamp, latency, download, upload from 1wire.network order by timestamp"
+	// mysqlDbQuery := "select timestamp, latency, download, upload from 1wire.network order by timestamp"
+
 	mysqlDbQuery := fmt.Sprintf(
 		"select timestamp, latency, download, upload from 1wire.network where timestamp > '%v' order by timestamp", latestTimestamp)
 
@@ -44,7 +44,7 @@ func main() {
 		upload := row.Float(3)
 		timestamp := util.GetTimeFromString(timestampStr)
 		log.Printf("ts=%v l=%v d=%v u=%v nts=%v\n", timestampStr, latency, download, upload, timestamp)
-		time.Sleep(10000 * time.Millisecond)
+		//time.Sleep(10000 * time.Millisecond)
 
 		// creating influx db data
 		bp, err := client.NewBatchPoints(client.BatchPointsConfig{
