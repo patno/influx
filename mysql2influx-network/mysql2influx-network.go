@@ -12,7 +12,7 @@ const influxDatabase = "network"    // the database name
 const influxMeasurement = "network" // the influx measurement
 
 func main() {
-	log.Println("-------------------------------------------------------")
+	log.Println("network network ---------------------------------------")
 
 	// Connect MySQL
 	db := util.FactoryMySQL()
