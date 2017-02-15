@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -21,16 +22,14 @@ func main() {
 
 	// Connect to InfluDB
 	influx := util.FactoryInfluxDB()
-	/*
-		latestTimestamp := util.GetLatestTimestamp(influx, influxDatabase, influxMeasurement)
-		log.Printf("Latest Influx DB timestamp:%v\n", latestTimestamp)
-	*/
+
+	latestTimestamp := util.GetLatestTimestamp(influx, influxDatabase, influxMeasurement)
+	log.Printf("Latest Influx DB timestamp:%v\n", latestTimestamp)
+
 	// Read MySQL rows
-	mysqlDbQuery := "SELECT timestamp, deviceid, value FROM 1wire.energi order by timestamp"
-	/*
-		mysqlDbQuery := fmt.Sprintf(
-			"select timestamp, deviceid, value from 1wire.network where timestamp > '%v' order by timestamp", latestTimestamp)
-	*/
+	mysqlDbQuery := fmt.Sprintf(
+		"select timestamp, deviceid, value from 1wire.network where timestamp > '%v' order by timestamp", latestTimestamp)
+
 	log.Printf("MySQL Query:%v\n", mysqlDbQuery)
 	rows, _, err := db.Query(mysqlDbQuery)
 	util.CheckErr(err)

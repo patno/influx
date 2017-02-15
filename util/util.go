@@ -31,6 +31,10 @@ func GetLatestTimestamp(c client.Client, db string, measurement string) string {
 	query := fmt.Sprintf("SELECT * FROM %v GROUP BY * ORDER BY DESC LIMIT 1", measurement)
 	res, err := QueryDB(c, query, db)
 	CheckErr(err)
+	if len(res[0].Series) == 0 {
+		return "2000-01-01 00:00:00"
+	}
+
 	var myData [][]interface{} = make([][]interface{}, len(res[0].Series[0].Values))
 	for i, d := range res[0].Series[0].Values {
 		myData[i] = d
