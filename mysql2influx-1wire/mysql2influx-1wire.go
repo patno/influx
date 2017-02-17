@@ -27,7 +27,7 @@ func main() {
 	log.Printf("Latest Influx DB timestamp:%v\n", latestTimestamp)
 
 	mysqlDbQuery := fmt.Sprintf(
-		"select timestamp, deviceid, value from 1wire.network where timestamp > '%v' order by timestamp", latestTimestamp)
+		"select timestamp, deviceid, value from 1wire.temperature where timestamp > '%v' order by timestamp", latestTimestamp)
 
 	log.Printf("MySQL Query:%v\n", mysqlDbQuery)
 	rows, _, err := db.Query(mysqlDbQuery)
