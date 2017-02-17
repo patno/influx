@@ -20,7 +20,7 @@ func main() {
 	log.Println("Connected to MySQl")
 
 	// Connect to InfluDB
-	influx := util.FactoryInfluxDB()
+	influx := util.FactoryInfluxDB(influxDatabase)
 
 	latestTimestamp := util.GetLatestTimestamp(influx, influxDatabase, influxMeasurement)
 	log.Printf("Latest Influx DB timestamp:%v\n", latestTimestamp)

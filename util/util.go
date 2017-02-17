@@ -84,7 +84,7 @@ func FactoryMySQL() mysql.Conn {
 }
 
 // FactoryInfluxDB creates a client to InfluxDB. Panics is fails.
-func FactoryInfluxDB() client.Client {
+func FactoryInfluxDB(database string) client.Client {
 	cfg, err := toml.LoadFile(os.Getenv("HOME") + "/config1wire.toml")
 	CheckErr(err)
 
@@ -95,6 +95,12 @@ func FactoryInfluxDB() client.Client {
 		Password: cfg.Get("influxdb.password").(string),
 	})
 	CheckErr(err)
+	if database != "" {
+		q := client.NewQuery("CREATE DATABASE "+database, "", "")
+		if response, err := c.Query(q); err == nil && response.Error() == nil {
+			fmt.Println(response.Results)
+		}
+	}
 	return c
 }
 
