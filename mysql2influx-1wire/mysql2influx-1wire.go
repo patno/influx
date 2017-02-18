@@ -9,7 +9,7 @@ import (
 	"github.com/patno/influx/util"
 )
 
-const influxDatabase = "testdb"         // the database name
+const influxDatabase = "1wire"          // the database name
 const influxMeasurement = "temperature" // the influx measurement
 
 func main() {
@@ -32,8 +32,8 @@ func main() {
 	log.Printf("MySQL Query:%v\n", mysqlDbQuery)
 	rows, _, err := db.Query(mysqlDbQuery)
 	util.CheckErr(err)
-	numberOfRows := len(rows)
-	log.Printf("Number of rows in MySQl:%v\n", numberOfRows)
+
+	log.Printf("Number of rows in MySQl:%v\n", len(rows))
 
 	for _, row := range rows {
 		timestampStr := row.Str(0)

@@ -76,6 +76,7 @@ func FactoryMySQL() mysql.Conn {
 		cfg.Get("mysql.database").(string))
 
 	err = db.Connect()
+
 	if err != nil {
 		panic(err)
 	}
