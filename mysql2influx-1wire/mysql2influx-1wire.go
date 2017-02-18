@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
 	client "github.com/influxdata/influxdb/client/v2"
 	"github.com/patno/influx/util"
@@ -48,7 +47,6 @@ func main() {
 		deviceName := deviceID2deviceName(deviceID)
 
 		log.Printf("ts=%v id=%v n=%v v=%v nts=%v\n", timestampStr, deviceID, deviceName, value, timestamp)
-		time.Sleep(10000 * time.Millisecond)
 
 		// creating influx db data
 		bp, err := client.NewBatchPoints(client.BatchPointsConfig{
