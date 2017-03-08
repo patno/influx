@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"fmt"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -86,17 +85,32 @@ func setCORSHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Access-Control-Allow-Headers", "accept, content-type")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Connection", "keep-alive")
 }
 
 func getTestConnectionAPI(w http.ResponseWriter, req *http.Request) {
 	log.Println("energy rest API Test Connection")
 	setCORSHeaders(w)
-	fmt.Fprintf(w, "OK")
+	//w.WriteHeader(http.StatusNotModified)
+
+	key := "black"
+	e := `"` + key + `"`
+	w.Header().Set("Etag", e)
+	w.Header().Set("Cache-Control", "max-age=2592000") // 30 days
+
+	if match := req.Header.Get("If-None-Match"); match != "" {
+		if strings.Contains(match, e) {
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+	}
+
 }
 
 func getSearchAPI(w http.ResponseWriter, req *http.Request) {
 	var queryResponse []string
-	log.Println("energy rest API Search")
+	log.Printf("energy rest API Search:%+v\n", req)
 	setCORSHeaders(w)
 	queryResponse = append(queryResponse, "energy")
 	json.NewEncoder(w).Encode(queryResponse)
@@ -135,10 +149,14 @@ func main() {
 	router.HandleFunc("/people/{id}", CreatePersonEndpoint).Methods("POST")
 	router.HandleFunc("/people/{id}", DeletePersonEndpoint).Methods("DELETE")
 	log.Println("energy rest API -------------------")
-	router.HandleFunc("/", getTestConnectionAPI).Methods("GET")
-	router.HandleFunc("/search", getSearchAPI).Methods("GET")
-	router.HandleFunc("/query", getQueryAPI).Methods("GET")
-	router.HandleFunc("/annotations", postAnnotationsAPI).Methods("POST")
+	router.HandleFunc("/", getTestConnectionAPI)
+	router.HandleFunc("/", getTestConnectionAPI)
+	router.HandleFunc("/search", getSearchAPI)
+	router.HandleFunc("/query", getQueryAPI)
+	router.HandleFunc("/annotations", postAnnotationsAPI)
 
-	log.Fatal(http.ListenAndServe(":8345", router))
+	err := http.ListenAndServe(":8345", router)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
