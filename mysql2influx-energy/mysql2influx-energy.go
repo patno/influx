@@ -44,7 +44,7 @@ func main() {
 			continue
 		}
 
-		timestamp := util.GetTimeFromString(timestampStr)
+		timestamp := util.GetTimeFromString(timestampStr, util.LayoutMYSQLDate)
 		deviceName := "energy"
 
 		log.Printf("ts=%v id=%v n=%v v=%v nts=%v\n", timestampStr, deviceID, deviceName, value, timestamp)

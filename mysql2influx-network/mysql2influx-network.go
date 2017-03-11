@@ -42,7 +42,7 @@ func main() {
 		latency := row.Float(1)
 		download := row.Float(2)
 		upload := row.Float(3)
-		timestamp := util.GetTimeFromString(timestampStr)
+		timestamp := util.GetTimeFromString(timestampStr, util.LayoutMYSQLDate)
 		log.Printf("ts=%v l=%v d=%v u=%v nts=%v\n", timestampStr, latency, download, upload, timestamp)
 		//time.Sleep(10000 * time.Millisecond)
 

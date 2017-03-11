@@ -19,9 +19,13 @@ import (
 // LayoutMYSQLDate layout of MySQL date
 const LayoutMYSQLDate = "2006-01-02 15:04:05"
 
+// LayoutSimpleJSONQueryDate layout of dates when simple-json queries from grafana
+// Example string 2017-03-07T23:38:57.112Z
+const LayoutSimpleJSONQueryDate = "2006-01-02T15:04:05.000Z"
+
 // GetTimeFromString parses date time string. Panics if fails.
-func GetTimeFromString(timestampStr string) time.Time {
-	t, err := time.Parse(LayoutMYSQLDate, timestampStr)
+func GetTimeFromString(timestampStr string, layout string) time.Time {
+	t, err := time.Parse(layout, timestampStr)
 	CheckErr(err)
 	return t
 }

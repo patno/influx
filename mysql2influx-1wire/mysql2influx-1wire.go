@@ -43,7 +43,7 @@ func main() {
 			continue
 		}
 
-		timestamp := util.GetTimeFromString(timestampStr)
+		timestamp := util.GetTimeFromString(timestampStr, util.LayoutMYSQLDate)
 		deviceName := deviceID2deviceName(deviceID)
 
 		log.Printf("ts=%v id=%v n=%v v=%v nts=%v\n", timestampStr, deviceID, deviceName, value, timestamp)

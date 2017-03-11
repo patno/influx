@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/patno/influx/util"
 )
 
 type Person struct {
@@ -127,15 +128,28 @@ func getQueryAPI(w http.ResponseWriter, request *http.Request) {
 	var qr [1]QueryResponseAPI
 	var req QueryRequestAPI
 	log.Println("energy rest API Query")
+
 	setCORSHeaders(w)
 
 	_ = json.NewDecoder(request.Body).Decode(&req)
-	log.Printf("HTTP Request:\n%+v\n", request)
+	//log.Printf("HTTP Request:\n%+v\n", request)
 	log.Printf("JSON Request:\n%+v\n", req)
+
+	if req.Range.From == "" {
+		return
+	}
+	startTime := util.GetTimeFromString(req.Range.From, util.LayoutSimpleJSONQueryDate)
+	endTime := util.GetTimeFromString(req.Range.To, util.LayoutSimpleJSONQueryDate)
+
 	qr[0].Target = "energy"
-	qr[0].Datapoints = make([][2]int64, 1)
+	qr[0].Datapoints = make([][2]int64, 2)
+
+	qr[0].Datapoints[0][1] = startTime.Unix() * 1000
 	qr[0].Datapoints[0][0] = 1
-	qr[0].Datapoints[0][1] = 2
+
+	qr[0].Datapoints[1][1] = endTime.Unix() * 1000
+	qr[0].Datapoints[1][0] = 2
+
 	log.Printf("JSON Response:\n%+v\n", qr)
 	json.NewEncoder(w).Encode(qr)
 }
