@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -11,8 +12,8 @@ import (
 )
 
 type QueryResponseAPI struct {
-	Target     string     `json:"target,omitempty"`
-	Datapoints [][2]int64 `json:"datapoints",omitempty`
+	Target     string       `json:"target,omitempty"`
+	Datapoints [][2]float64 `json:"datapoints",omitempty`
 }
 
 type QueryRequestAPI struct {
@@ -92,15 +93,48 @@ func getQueryAPI(w http.ResponseWriter, request *http.Request) {
 	startTime := util.GetTimeFromString(req.Range.From, util.LayoutSimpleJSONQueryDate)
 	endTime := util.GetTimeFromString(req.Range.To, util.LayoutSimpleJSONQueryDate)
 
+	db := util.FactoryMySQL()
+	defer db.Close()
+
+	mysqlDbQuery := fmt.Sprintf(
+		"select timestamp, deviceid, value from 1wire.energi where timestamp > '%v' and timestamp < '%v' order by timestamp",
+		startTime.Format(util.LayoutMYSQLDate),
+		endTime.Format(util.LayoutMYSQLDate))
+
+	log.Printf("MySQL Query:%v\n", mysqlDbQuery)
+
+	rows, _, err := db.Query(mysqlDbQuery)
+	util.CheckErr(err)
+	log.Printf("Number of rows in MySQl:%v\n", len(rows))
+
 	qr[0].Target = "energy"
-	qr[0].Datapoints = make([][2]int64, 2)
+	qr[0].Datapoints = make([][2]float64, len(rows))
+	i := 0
+	oldy := 0.0
+	//	oldx := int64(0)
+	for _, row := range rows {
+		timestampStr := row.Str(0)
+		value := row.Float(2)
 
-	qr[0].Datapoints[0][1] = startTime.Unix() * 1000
-	qr[0].Datapoints[0][0] = 1
+		//log.Printf("t=%v, v=%v, i=%v", timestampStr, value, i)
 
-	qr[0].Datapoints[1][1] = endTime.Unix() * 1000
-	qr[0].Datapoints[1][0] = 2
+		if timestampStr == "0000-00-00 00:00:00" {
+			continue
+		}
+		i++
+		if i == 1 {
+			oldy = value
+			continue
+		}
 
+		timestamp := util.GetTimeFromString(timestampStr, util.LayoutMYSQLDate)
+		diffy := value - oldy
+		//diffx := timestamp.Unix()*1000 - oldx
+
+		qr[0].Datapoints[i-1][1] = float64(timestamp.Unix() * 1000)
+		qr[0].Datapoints[i-1][0] = diffy
+		oldy = value
+	}
 	log.Printf("JSON Response:\n%+v\n", qr)
 	json.NewEncoder(w).Encode(qr)
 }
