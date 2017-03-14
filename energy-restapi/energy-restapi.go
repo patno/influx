@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"math"
+
 	"github.com/gorilla/mux"
 	"github.com/patno/influx/util"
 )
@@ -130,6 +132,10 @@ func getQueryAPI(w http.ResponseWriter, request *http.Request) {
 		timestamp := util.GetTimeFromString(timestampStr, util.LayoutMYSQLDate)
 		diffy := value - oldy
 		//diffx := timestamp.Unix()*1000 - oldx
+
+		if math.Abs(diffy) > 1000 {
+			continue
+		}
 
 		qr[0].Datapoints[i-1][1] = float64(timestamp.Unix() * 1000)
 		qr[0].Datapoints[i-1][0] = diffy

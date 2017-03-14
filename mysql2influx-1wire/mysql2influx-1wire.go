@@ -8,7 +8,7 @@ import (
 	"github.com/patno/influx/util"
 )
 
-const influxDatabase = "1wire"          // the database name
+const influxDatabase = "wire"           // the database name
 const influxMeasurement = "temperature" // the influx measurement
 
 func main() {
@@ -45,6 +45,9 @@ func main() {
 
 		timestamp := util.GetTimeFromString(timestampStr, util.LayoutMYSQLDate)
 		deviceName := deviceID2deviceName(deviceID)
+		if deviceName == "" {
+			continue
+		}
 
 		log.Printf("ts=%v id=%v n=%v v=%v nts=%v\n", timestampStr, deviceID, deviceName, value, timestamp)
 
@@ -91,5 +94,6 @@ func deviceID2deviceName(id string) string {
 	case "10.79172A020800":
 		return "HåletVarm"
 	}
-	panic(fmt.Sprintf("No matching device name for id:%v\n", id))
+	log.Printf("No matching device name for id:%v\n", id)
+	return ""
 }
