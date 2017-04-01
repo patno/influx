@@ -16,6 +16,19 @@ import (
 
 // Native engine
 
+// NameToDeviceID Friendy name to ID mapping
+var NameToDeviceID = map[string]string{
+	"Utetemp":      "10.1C0D2A020800",
+	"RadiatorVarm": "10.14012A020800",
+	"Källare":      "10.8F4F29020800",
+	"RadiatorKall": "10.6E4F29020800",
+	"VattenVarm":   "10.1C012A020800",
+	"VattenKall":   "10.771B2A020800",
+	"Mellanvåning": "10.08FE29020800",
+	"HåletKall":    "10.BD0A2A020800",
+	"HåletVarm":    "10.79172A020800",
+}
+
 // LayoutMYSQLDate layout of MySQL date
 const LayoutMYSQLDate = "2006-01-02 15:04:05"
 
