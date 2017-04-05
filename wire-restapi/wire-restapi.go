@@ -114,10 +114,20 @@ func getQueryAPI(w http.ResponseWriter, request *http.Request) {
 		ID := util.NameToDeviceID[targetQuery.Target]
 		log.Printf("ID to query:%v\n", ID)
 
-		mysqlDbQuery := fmt.Sprintf(
-			"select timestamp, deviceid, value from 1wire.energi where timestamp > '%v' and timestamp < '%v' order by timestamp",
-			startTime.Format(util.LayoutMYSQLDate),
-			endTime.Format(util.LayoutMYSQLDate))
+		var mysqlDbQuery string
+
+		if strings.HasPrefix(ID, "10") {
+			mysqlDbQuery = fmt.Sprintf(
+				"select timestamp, value from 1wire.energi where timestamp > '%v' and timestamp < '%v' and deviceid = '%v' order by timestamp",
+				startTime.Format(util.LayoutMYSQLDate),
+				endTime.Format(util.LayoutMYSQLDate), ID)
+		} else {
+			mysqlDbQuery = fmt.Sprintf(
+				"select timestamp, %v from 1wire.network where timestamp > '%v' and timestamp < '%v' and order by timestamp",
+				ID,
+				startTime.Format(util.LayoutMYSQLDate),
+				endTime.Format(util.LayoutMYSQLDate))
+		}
 
 		log.Printf("MySQL Query:%v\n", mysqlDbQuery)
 
@@ -129,10 +139,9 @@ func getQueryAPI(w http.ResponseWriter, request *http.Request) {
 		qr[targetIndex].Datapoints = make([][2]float64, len(rows))
 		i := 0
 
-		//	oldx := int64(0)
 		for _, row := range rows {
 			timestampStr := row.Str(0)
-			value := row.Float(2)
+			value := row.Float(1)
 
 			//log.Printf("t=%v, v=%v, i=%v", timestampStr, value, i)
 
@@ -141,8 +150,8 @@ func getQueryAPI(w http.ResponseWriter, request *http.Request) {
 			}
 
 			timestamp := util.GetTimeFromString(timestampStr, util.LayoutMYSQLDate)
-			qr[0].Datapoints[i][1] = float64(timestamp.Unix() * 1000)
-			qr[0].Datapoints[i][0] = value
+			qr[i].Datapoints[i][1] = float64(timestamp.Unix() * 1000)
+			qr[i].Datapoints[i][0] = value
 			i++
 		}
 		targetIndex++
