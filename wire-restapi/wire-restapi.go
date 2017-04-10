@@ -16,6 +16,7 @@ type QueryResponseAPI struct {
 	Datapoints [][2]float64 `json:"datapoints",omitempty`
 }
 
+// from Macbook Air
 type Target struct {
 	Target string `json:"target"`
 	RefID  int    `json:"refId"`
